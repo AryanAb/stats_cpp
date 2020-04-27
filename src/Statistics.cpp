@@ -1,12 +1,16 @@
 // Statisitcs.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#ifndef SQRT_1_2
+#define SQRT_1_2 0.7071067812
+#endif
+
 #include <iostream>
 #include <math.h>
 #include <vector>
 #include <algorithm>
 #include "Statisitcs.hpp"
-
+#include "Tables.hpp"
 
 st::oneVarStats st::getOneVarStats(std::vector<double> &arr)
 {
@@ -24,7 +28,6 @@ st::oneVarStats st::getOneVarStats(std::vector<double> &arr)
 	{
 		m_index = (arr.size() - 1) / 2;
 		data.median = arr.at(m_index);
-		
 	}
 	else
 	{
@@ -61,7 +64,7 @@ unsigned int st::median(unsigned int l, unsigned int r)
 	return n + l;
 }
 
-void st::IQR(std::vector<double>& arr, st::oneVarStats &data)
+void st::IQR(std::vector<double> &arr, st::oneVarStats &data)
 {
 	unsigned int mid_index = st::median(0, arr.size());
 
@@ -90,17 +93,39 @@ void st::IQR(std::vector<double>& arr, st::oneVarStats &data)
 	}
 
 	data.iqr = data.q3 - data.q1;
+}
 
+double st::calcZScore(double value, double mean, double std)
+{
+	return (value - mean) / std;
+}
+
+double st::calcZScore(double value, st::oneVarStats stats)
+{
+	return st::calcZScore(value, stats.mean, stats.std);
+}
+
+double st::calcZScore(double value, std::vector<double> values)
+{
+	st::oneVarStats stats = st::getOneVarStats(values);
+	
+	return st::calcZScore(value, stats.mean, stats.std);
+} 
+
+double st::normalCDF_calc(double value)
+{
+	return 0.5 * std::erfc(-value * SQRT_1_2);
+}
+
+double st::normalCDF_table(double value)
+{
+	return st::cdf.at(value);
 }
 
 int main()
 {
 
-	std::vector<double> vec = {1, 2, 3, 5, 6};
-
-	st::oneVarStats stats = st::getOneVarStats(vec);
-
-	std::cout << stats.mean << std::endl;
+	std::cout << st::normalCDF_calc(2.00) << std::endl;
 
 	return 0;
 }
