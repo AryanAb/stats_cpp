@@ -1,6 +1,3 @@
-// Statisitcs.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #ifndef SQRT_1_2
 #define SQRT_1_2 0.7071067812
 #endif
@@ -9,8 +6,7 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
-#include "Statisitcs.hpp"
-#include "Tables.hpp"
+#include "Statistics.hpp"
 
 st::oneVarStats st::getOneVarStats(std::vector<double> &arr)
 {
@@ -91,7 +87,6 @@ void st::IQR(std::vector<double> &arr, st::oneVarStats &data)
 		double Q3 = arr.at(st::median(mid_index + 1, arr.size()));
 		data.q3 = Q3;
 	}
-
 	data.iqr = data.q3 - data.q1;
 }
 
@@ -99,7 +94,6 @@ double st::calcZScore(double value, double mean, double std)
 {
 	return (value - mean) / std;
 }
-
 double st::calcZScore(double value, st::oneVarStats stats)
 {
 	return st::calcZScore(value, stats.mean, stats.std);
@@ -108,24 +102,18 @@ double st::calcZScore(double value, st::oneVarStats stats)
 double st::calcZScore(double value, std::vector<double> values)
 {
 	st::oneVarStats stats = st::getOneVarStats(values);
-	
-	return st::calcZScore(value, stats.mean, stats.std);
-} 
 
-double st::normalCDF_calc(double value)
+	return st::calcZScore(value, stats.mean, stats.std);
+}
+
+// https://stackoverflow.com/questions/2328258/cumulative-normal-distribution-function-in-c-c
+double st::normalCDF(double value)
 {
 	return 0.5 * std::erfc(-value * SQRT_1_2);
 }
 
-double st::normalCDF_table(double value)
-{
-	return st::cdf.at(value);
-}
-
 int main()
 {
-
-	std::cout << st::normalCDF_calc(2.00) << std::endl;
 
 	return 0;
 }
