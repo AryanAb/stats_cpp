@@ -1,12 +1,11 @@
 #pragma once
 
-namespace stats
+namespace stats 
 {
-
 	//using p_getOneVarStats = stats::oneVarStats(*)(std::vector<double>*);
 	//void timer(std::vector<double>* nums, p_getOneVarStats func);
 
-	template <typename T, typename F>
+	template<typename T, typename F>
 	void timer(T inputs, F func)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
@@ -16,5 +15,4 @@ namespace stats
 
 		std::cout << duration.count() << std::endl;
 	}
-
-} // namespace stats
+}

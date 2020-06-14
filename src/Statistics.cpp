@@ -13,13 +13,13 @@
 #include "Statistics.hpp"
 #include "Profiler.hpp"
 
-std::ostream &operator<<(std::ostream &stream, const stats::oneVarStats &data)
-{
-	stream << data.min << ", " << data.q1 << ", " << data.median << ", " << data.q3 << ", " << data.max;
-	return stream;
-}
+//std::ostream& operator<<(std::ostream& stream, const stats::oneVarStats& data)
+//{
+//	stream << data.min << ", " << data.q1 << ", " << data.median << ", " << data.q3 << ", " << data.max;
+//	return stream;
+//}
 
-stats::oneVarStats stats::getOneVarStats(std::vector<double> *arr)
+stats::oneVarStats stats::getOneVarStats(std::vector<double>* arr)
 {
 	std::sort(arr->begin(), arr->end());
 
@@ -29,7 +29,7 @@ stats::oneVarStats stats::getOneVarStats(std::vector<double> *arr)
 	data.min = arr->front();
 	data.max = arr->back();
 
-	size_t m_index;
+	 size_t m_index;
 
 	if (arr->size() % 2 != 0)
 	{
@@ -53,14 +53,15 @@ stats::oneVarStats stats::getOneVarStats(std::vector<double> *arr)
 	}
 
 	data.mean = mean;
-	data.std = sqrt(totalDeviation / (arr->size() - 1));
+	data.variance = totalDeviation / (arr->size() - 1);
+	data.std = sqrt(data.variance);
 
 	data.mode = stats::mode(arr);
 
 	return data;
 }
 
-double stats::simpleSum(const std::vector<double> *arr)
+double stats::simpleSum(const std::vector<double>* arr)
 {
 	double sum = 0;
 	for (double num : *arr)
@@ -72,7 +73,7 @@ double stats::simpleSum(const std::vector<double> *arr)
 }
 
 // Improved Kahan–Babuška algorithm
-double stats::complexSum(const std::vector<double> *arr)
+double stats::complexSum(const std::vector<double>* arr)
 {
 	double sum = 0.0;
 	double c = 0.0;
@@ -93,6 +94,29 @@ double stats::complexSum(const std::vector<double> *arr)
 	return sum + c;
 }
 
+double stats::harmonicMean(std::vector<double>& arr)
+{
+	double sum = 0;
+	for (double num : arr)
+	{
+		sum += 1 / num;
+	}
+
+	return arr.size() / sum;
+}
+
+double stats::geometricMean(std::vector<double>& arr)
+{
+	double product = 1;
+	for (double num : arr)
+	{
+		product *= num;
+	}
+
+	return std::pow(product, 1.0/arr.size());
+}
+
+
 unsigned int stats::median(unsigned int l, size_t r)
 {
 	size_t n = r - l + 1;
@@ -100,7 +124,7 @@ unsigned int stats::median(unsigned int l, size_t r)
 	return n + l;
 }
 
-void stats::IQR(const std::vector<double> *arr, stats::oneVarStats *data)
+void stats::IQR(const std::vector<double>* arr, stats::oneVarStats* data)
 {
 	unsigned int mid_index = stats::median(0, arr->size());
 
@@ -130,7 +154,7 @@ void stats::IQR(const std::vector<double> *arr, stats::oneVarStats *data)
 	data->iqr = data->q3 - data->q1;
 }
 
-double stats::mode(std::vector<double> *arr)
+double stats::mode(std::vector<double>* arr)
 {
 	std::set<double> s(arr->begin(), arr->end());
 
@@ -147,18 +171,19 @@ double stats::mode(std::vector<double> *arr)
 	}
 
 	return mode;
+
 }
 
-int stats::count(std::vector<double> *arr, double x)
+int stats::count(std::vector<double>* arr, double x)
 {
 
 	std::vector<double>::iterator low = std::lower_bound(arr->begin(), arr->end(), x);
 
-	if (low - (arr->begin()) == arr->size() || *low != x)
+	if (low-(arr->begin()) == arr->size() || *low != x)
 	{
 		return 0;
 	}
-
+	
 	std::vector<double>::iterator high = std::upper_bound(arr->begin(), arr->end(), x);
 
 	int n = static_cast<int>((high - (arr->begin()))) - static_cast<int>((low - (arr->begin())));
@@ -170,19 +195,21 @@ double stats::calcZScore(double value, double mean, double std)
 {
 	return (value - mean) / std;
 }
+
 double stats::calcZScore(double value, stats::oneVarStats stats)
 {
 	return stats::calcZScore(value, stats.mean, stats.std);
 }
 
-double stats::calcZScore(double value, std::vector<double> *values)
+double stats::calcZScore(double value, std::vector<double>* values)
 {
 	stats::oneVarStats data = stats::getOneVarStats(values);
 
 	return stats::calcZScore(value, data.mean, data.std);
 }
 
-const stats::linearRegression stats::calcLinearRegression(std::vector<xyPair> *nums)
+
+const stats::linearRegression stats::calcLinearRegression(std::vector<xyPair>* nums)
 {
 	std::vector<double> x;
 	std::vector<double> y;
@@ -192,24 +219,54 @@ const stats::linearRegression stats::calcLinearRegression(std::vector<xyPair> *n
 		y.push_back(pair.y);
 	}
 	stats::oneVarStats xValues = stats::getOneVarStats(&x);
-	stats::oneVarStats yValue = stats::getOneVarStats(&y);
+	stats::oneVarStats yValues = stats::getOneVarStats(&y);
 
 	double sum = 0;
 	for (xyPair pair : *nums)
 	{
-		sum += stats::calcZScore(pair.x, xValues.mean, xValues.std) * calcZScore(pair.y, yValue.mean, yValue.std);
+		sum += stats::calcZScore(pair.x, xValues.mean, xValues.std) * calcZScore(pair.y, yValues.mean, yValues.std);
 	}
 
-	const stats::linearRegression linearRegression(sum / (nums->size() - 1), xValues, yValue);
+	const stats::linearRegression result(sum / (nums->size() - 1), xValues, yValues);
 
-	return linearRegression;
+	return result;
+
 }
 
 // https://stackoverflow.com/questions/2328258/cumulative-normal-distribution-function-in-c-c
-double stats::normalCDF(double value)
+double stats::normalCDF(double zScore)
 {
-	return 0.5 * std::erfc(-value * SQRT_1_2);
+	return 0.5 * std::erfc(-zScore * SQRT_1_2);
 }
+
+double stats::invNormalCDF(double value)
+{
+
+}
+
+double stats::calcPValue(double value, double mean, double std)
+{
+	return  1 - normalCDF((value - mean) / std);
+}
+
+double stats::calcPValue(double value, stats::oneVarStats stats)
+{
+	return stats::calcPValue(value, stats.mean, stats.std);
+}
+
+double stats::calcPValue(double value, std::vector<double>* values)
+{
+	stats::oneVarStats data = stats::getOneVarStats(values);
+
+	return stats::calcPValue(value, data.mean, data.std);
+}
+
+/*stats::interval stats::calcInterval(double confidence, double mean, double std)
+{
+	double zStar = invNormalCDF(confidence / 100);
+
+	return nullptr;
+}*/
 
 /*void stats::timer(std::vector<double>* nums, p_getOneVarStats func)
 {
@@ -221,13 +278,12 @@ double stats::normalCDF(double value)
 	std::cout << duration.count() << std::endl;
 }*/
 
+
+
 int main()
-{
+{              
 
-	std::vector<stats::xyPair> nums = {stats::xyPair(0, 0), stats::xyPair(1, 1), stats::xyPair(2, 2), stats::xyPair(3, 3)};
-
-	const stats::linearRegression linearRegression = stats::calcLinearRegression(&nums);
-	std::cout << linearRegression.slope << std::endl;
+	std::cout << stats::normalCDF(1.0) << std::endl;
 
 	return 0;
 }
