@@ -7,4 +7,5 @@ before_script:
   - cd build
   - cmake ../src
 
-script: cd ../src && make all
+script:
+  - make
