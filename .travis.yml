@@ -1,4 +1,10 @@
 language: cpp
 compiler:
   - gcc
-script: cd src && make all
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ../src
+
+script: cd ../src && make all
