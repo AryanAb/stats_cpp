@@ -4,6 +4,10 @@
 #define SQRT_1_2 0.7071067812
 #endif
 
+#ifndef PI
+#define PI 3.1415926535
+#endif
+
 #include <iostream>
 #include <math.h>
 #include <vector>
@@ -52,7 +56,7 @@ namespace stats
 		double slope;
 		double yIntercept;
 
-		linearRegression(double r, oneVarStats &x, oneVarStats &y)
+		linearRegression(double r, const oneVarStats &x, const oneVarStats &y)
 			: r(r)
 		{
 			rSquared = r * r;
@@ -67,6 +71,11 @@ namespace stats
 		double mean;
 		double max;
 		double confidence;
+
+		interval(double min, double mean, double max, double confidence)
+			: min(min), mean(mean), max(max), confidence(confidence)
+		{
+		}
 	};
 
 	double simpleSum(const std::vector<double> *arr)
@@ -102,7 +111,12 @@ namespace stats
 		return sum + c;
 	}
 
-	double harmonicMean(std::vector<double> &arr)
+	inline double arithmeticMean(const std::vector<double> &arr)
+	{
+		return complexSum(&arr) / arr.size();
+	}
+
+	double harmonicMean(const std::vector<double> &arr)
 	{
 		double sum = 0;
 		for (double num : arr)
@@ -113,7 +127,7 @@ namespace stats
 		return arr.size() / sum;
 	}
 
-	double geometricMean(std::vector<double> &arr)
+	double geometricMean(const std::vector<double> &arr)
 	{
 		double product = 1;
 		for (double num : arr)
@@ -161,23 +175,7 @@ namespace stats
 		data->iqr = data->q3 - data->q1;
 	}
 
-	int count(std::vector<double> *arr, double x)
-	{
-		std::vector<double>::iterator low = std::lower_bound(arr->begin(), arr->end(), x);
-
-		if (low - (arr->begin()) == arr->size() || *low != x)
-		{
-			return 0;
-		}
-
-		std::vector<double>::iterator high = std::upper_bound(arr->begin(), arr->end(), x);
-
-		int n = static_cast<int>((high - (arr->begin()))) - static_cast<int>((low - (arr->begin())));
-
-		return n;
-	}
-
-	double mode(std::vector<double> *arr)
+	double mode(const std::vector<double> *arr)
 	{
 		std::set<double> s(arr->begin(), arr->end());
 
@@ -185,7 +183,7 @@ namespace stats
 		double mode = arr->at(0);
 		for (double num : s)
 		{
-			int occurances = stats::count(arr, num);
+			int occurances = std::count(arr->begin(), arr->end(), num);
 			if (occurances > maxOccurances)
 			{
 				maxOccurances = occurances;
@@ -221,7 +219,7 @@ namespace stats
 		IQR(arr, &data);
 
 		data.sum = complexSum(arr);
-		double mean = data.sum / arr->size();
+		double mean = arithmeticMean(*arr);
 
 		double totalDeviation = 0;
 		for (double i : *arr)
@@ -262,10 +260,14 @@ namespace stats
 		return 0.5 * std::erfc(-zScore * SQRT_1_2);
 	}
 
+	double inverf(double z)
+	{
+		return 0.5 * sqrt(PI) * (z + PI / 12 * pow(z, 3) + (7 * pow(PI, 2)) / 480 * pow(z, 5) + (127 * pow(PI, 3)) / 40320 * pow(z, 7) + (4369 * pow(PI, 4)) / 5806080 * pow(z, 9) + (34807 * pow(PI, 5)) / 182476800 * pow(z, 11));
+	}
+
 	double invNormalCDF(double value)
 	{
-		// function being implemented
-		return 0.0;
+		return inverf(1 - 2 * value) / (-1 * SQRT_1_2);
 	}
 
 	double calcPValue(double value, double mean, double std)
@@ -285,9 +287,13 @@ namespace stats
 		return calcPValue(value, data.mean, data.std);
 	}
 
-	interval calcInterval(double confidence, double mean, double std);
+	interval calcInterval(double confidence, uint32_t n, double p)
+	{
+		double me = invNormalCDF((1 - confidence) / 2 + confidence) * sqrt(((1 - p) * p) / n);
+		return interval(p - me, p, p + me, confidence);
+	}
 
-	const linearRegression calcLinearRegression(std::vector<xyPair> *nums)
+	const linearRegression calcLinearRegression(const std::vector<xyPair> *nums)
 	{
 		std::vector<double> x;
 		std::vector<double> y;
