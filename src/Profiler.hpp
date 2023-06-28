@@ -5,8 +5,8 @@ namespace stats
 	//using p_getOneVarStats = stats::oneVarStats(*)(std::vector<double>*);
 	//void timer(std::vector<double>* nums, p_getOneVarStats func);
 
-	template<typename T, typename F>
-	void timer(T inputs, F func)
+	template<typename F,typename T>
+	void timer(F func, T inputs)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
 		func(inputs);

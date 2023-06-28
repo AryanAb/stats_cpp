@@ -290,11 +290,11 @@ namespace stats
 		return interval(p - me, p, p + me, confidence);
 	}
 
-	const linearRegression calcLinearRegression(const std::vector<xyPair> &nums)
+	const linearRegression calcLinearRegression(const std::vector<xyPair> &pairs)
 	{
 		std::vector<double> x;
 		std::vector<double> y;
-		for (xyPair pair : nums)
+		for (xyPair pair : pairs)
 		{
 			x.push_back(pair.x);
 			y.push_back(pair.y);
@@ -303,12 +303,12 @@ namespace stats
 		oneVarStats yValues = getOneVarStats(y);
 
 		double sum = 0;
-		for (xyPair pair : nums)
+		for (xyPair pair : pairs)
 		{
 			sum += calcZScore(pair.x, xValues.mean, xValues.std) * calcZScore(pair.y, yValues.mean, yValues.std);
 		}
 
-		const linearRegression result(sum / (nums.size() - 1), xValues, yValues);
+		const linearRegression result(sum / (pairs.size() - 1), xValues, yValues);
 
 		return result;
 	}
