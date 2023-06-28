@@ -75,10 +75,10 @@ namespace stats
 		}
 	};
 
-	double simpleSum(const std::vector<double> *arr)
+	double simpleSum(const std::vector<double> &arr)
 	{
 		double sum = 0;
-		for (double num : *arr)
+		for (double num : arr)
 		{
 			sum += num;
 		}
@@ -87,11 +87,11 @@ namespace stats
 	}
 
 	// Improved Kahan–Babuška algorithm
-	double complexSum(const std::vector<double> *arr)
+	double complexSum(const std::vector<double> &arr)
 	{
 		double sum = 0.0;
 		double c = 0.0;
-		for (double num : *arr)
+		for (double num : arr)
 		{
 			double t = sum + num;
 			if (abs(sum) > abs(num))
@@ -110,7 +110,7 @@ namespace stats
 
 	inline double arithmeticMean(const std::vector<double> &arr)
 	{
-		return complexSum(&arr) / arr.size();
+		return complexSum(arr) / arr.size();
 	}
 
 	double harmonicMean(const std::vector<double> &arr)
@@ -142,48 +142,48 @@ namespace stats
 		return n + l;
 	}
 
-	void IQR(const std::vector<double> *arr, oneVarStats *data)
+	void IQR(const std::vector<double> &arr, oneVarStats &data)
 	{
-		unsigned int mid_index = median(0, arr->size());
+		unsigned int mid_index = median(0, arr.size());
 
 		if (mid_index % 2 == 0)
 		{
 			unsigned int index = median(0, mid_index);
-			double Q1 = (arr->at(index - 1) + arr->at(index)) / 2;
-			data->q1 = Q1;
+			double Q1 = (arr.at(index - 1) + arr.at(index)) / 2;
+			data.q1 = Q1;
 		}
 		else
 		{
-			double Q1 = arr->at(median(0, mid_index));
-			data->q1 = Q1;
+			double Q1 = arr.at(median(0, mid_index));
+			data.q1 = Q1;
 		}
 
 		if (mid_index % 2 == 0)
 		{
-			unsigned int index = median(mid_index + 1, arr->size());
-			double Q3 = (arr->at(index - 1) + arr->at(index)) / 2;
-			data->q3 = Q3;
+			unsigned int index = median(mid_index + 1, arr.size());
+			double Q3 = (arr.at(index - 1) + arr.at(index)) / 2;
+			data.q3 = Q3;
 		}
 		else
 		{
-			double Q3 = arr->at(median(mid_index + 1, arr->size()));
-			data->q3 = Q3;
+			double Q3 = arr.at(median(mid_index + 1, arr.size()));
+			data.q3 = Q3;
 		}
-		data->iqr = data->q3 - data->q1;
+		data.iqr = data.q3 - data.q1;
 	}
 
-	double mode(const std::vector<double> *arr)
+	double mode(const std::vector<double> &arr)
 	{
-		std::set<double> s(arr->begin(), arr->end());
+		std::set<double> s(arr.begin(), arr.end());
 
-		int maxOccurances = 1;
-		double mode = arr->at(0);
+		int maxOccurrences = 1;
+		double mode = arr.at(0);
 		for (double num : s)
 		{
-			int occurances = std::count(arr->begin(), arr->end(), num);
-			if (occurances > maxOccurances)
+			int occurrences = std::count(arr.begin(), arr.end(), num);
+			if (occurrences > maxOccurrences)
 			{
-				maxOccurances = occurances;
+				maxOccurrences = occurrences;
 				mode = num;
 			}
 		}
@@ -191,41 +191,41 @@ namespace stats
 		return mode;
 	}
 
-	oneVarStats getOneVarStats(std::vector<double> *arr)
+	oneVarStats getOneVarStats(std::vector<double> &arr)
 	{
-		std::sort(arr->begin(), arr->end());
+		std::sort(arr.begin(), arr.end());
 
 		oneVarStats data;
 
-		data.size = arr->size();
-		data.min = arr->front();
-		data.max = arr->back();
+		data.size = arr.size();
+		data.min = arr.front();
+		data.max = arr.back();
 
 		size_t m_index;
 
-		if (arr->size() % 2 != 0)
+		if (arr.size() % 2 != 0)
 		{
-			m_index = (arr->size() - 1) / 2;
-			data.median = arr->at(m_index);
+			m_index = (arr.size() - 1) / 2;
+			data.median = arr.at(m_index);
 		}
 		else
 		{
-			data.median = (arr->at(arr->size() / 2 - 1) + arr->at(arr->size() / 2)) / 2;
+			data.median = (arr.at(arr.size() / 2 - 1) + arr.at(arr.size() / 2)) / 2;
 		}
 
-		IQR(arr, &data);
+		IQR(arr, data);
 
 		data.sum = complexSum(arr);
-		double mean = arithmeticMean(*arr);
+		double mean = arithmeticMean(arr);
 
 		double totalDeviation = 0;
-		for (double i : *arr)
+		for (double i : arr)
 		{
 			totalDeviation += pow((i - mean), 2);
 		}
 
 		data.mean = mean;
-		data.variance = totalDeviation / (arr->size() - 1);
+		data.variance = totalDeviation / (arr.size() - 1);
 		data.std = sqrt(data.variance);
 
 		data.mode = mode(arr);
@@ -243,7 +243,7 @@ namespace stats
 		return calcZScore(value, stats.mean, stats.std);
 	}
 
-	double calcZScore(double value, std::vector<double> *values)
+	double calcZScore(double value, std::vector<double> &values)
 	{
 		oneVarStats data = getOneVarStats(values);
 
@@ -277,7 +277,7 @@ namespace stats
 		return calcPValue(value, stats.mean, stats.std);
 	}
 
-	double calcPValue(double value, std::vector<double> *values)
+	double calcPValue(double value, std::vector<double> &values)
 	{
 		oneVarStats data = getOneVarStats(values);
 
@@ -290,25 +290,25 @@ namespace stats
 		return interval(p - me, p, p + me, confidence);
 	}
 
-	const linearRegression calcLinearRegression(const std::vector<xyPair> *nums)
+	const linearRegression calcLinearRegression(const std::vector<xyPair> &nums)
 	{
 		std::vector<double> x;
 		std::vector<double> y;
-		for (xyPair pair : *nums)
+		for (xyPair pair : nums)
 		{
 			x.push_back(pair.x);
 			y.push_back(pair.y);
 		}
-		oneVarStats xValues = getOneVarStats(&x);
-		oneVarStats yValues = getOneVarStats(&y);
+		oneVarStats xValues = getOneVarStats(x);
+		oneVarStats yValues = getOneVarStats(y);
 
 		double sum = 0;
-		for (xyPair pair : *nums)
+		for (xyPair pair : nums)
 		{
 			sum += calcZScore(pair.x, xValues.mean, xValues.std) * calcZScore(pair.y, yValues.mean, yValues.std);
 		}
 
-		const linearRegression result(sum / (nums->size() - 1), xValues, yValues);
+		const linearRegression result(sum / (nums.size() - 1), xValues, yValues);
 
 		return result;
 	}
