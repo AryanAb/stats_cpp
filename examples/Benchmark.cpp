@@ -5,14 +5,16 @@
 #include <random>
 #include <iostream>
 
+#define NUM_DATAPOINTS (500000)
+
 int main()
 {
 	std::vector<double> nums;
-	nums.reserve(1000000);
+	nums.reserve(NUM_DATAPOINTS);
 
-	for (int i = 0; i < 1000000; i++)
+	for (int i = 0; i < NUM_DATAPOINTS; i++)
 	{
-		int n = rand() % 1000000;
+		int n = rand() % NUM_DATAPOINTS;
 		nums.push_back(n);
 	}
 

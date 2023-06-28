@@ -195,4 +195,13 @@ stats::LinearRegression lr = stats::calcLinearRegression(pairs);
 
 ## Performance
 
-This repo contains a very simple profiler in `Profiler.hpp` that could be used for benchmarking. An example is given in `examples/Benchmark.cpp`.
+This repo contains a very simple profiler in `Profiler.hpp` that could be used for benchmarking. An example is given in `examples/Benchmark.cpp`. Using the same program, the following benchmark was done:
+
+| Number of Data Points | Number of Seconds |
+| --------------------- | ----------------- |
+|      1000             |     0.0002        |
+|      10,000           |     0.0114        |
+|     100,000           |     1.1793        |
+|    500,000            |     34.0256       |
+
+Note that the benchmark was compiled with `clang++ -O3`.
