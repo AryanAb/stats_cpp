@@ -1,13 +1,5 @@
 #pragma once
 
-#ifndef SQRT_1_2
-#define SQRT_1_2 0.7071067812
-#endif
-
-#ifndef PI
-#define PI 3.1415926535
-#endif
-
 #include <iostream>
 #include <math.h>
 #include <vector>
@@ -16,11 +8,16 @@
 #include <future>
 #include <random>
 #include <chrono>
+#include <numbers>
 #include "Statistics.hpp"
 #include "Profiler.hpp"
 
 namespace stats
 {
+	namespace constants 
+	{
+		constexpr double SQRT_1_2 = 0.7071067812;
+	} // namespace stats::constants
 
 	struct oneVarStats
 	{
@@ -257,17 +254,17 @@ namespace stats
 	double normalCDF(double zScore)
 	{
 		// https://stackoverflow.com/questions/2328258/cumulative-normal-distribution-function-in-c-c
-		return 0.5 * std::erfc(-zScore * SQRT_1_2);
+		return 0.5 * std::erfc(-zScore * constants::SQRT_1_2);
 	}
 
 	double inverf(double z)
 	{
-		return 0.5 * sqrt(PI) * (z + PI / 12 * pow(z, 3) + (7 * pow(PI, 2)) / 480 * pow(z, 5) + (127 * pow(PI, 3)) / 40320 * pow(z, 7) + (4369 * pow(PI, 4)) / 5806080 * pow(z, 9) + (34807 * pow(PI, 5)) / 182476800 * pow(z, 11));
+		return 0.5 * sqrt(std::numbers::pi) * (z + std::numbers::pi / 12 * pow(z, 3) + (7 * pow(std::numbers::pi, 2)) / 480 * pow(z, 5) + (127 * pow(std::numbers::pi, 3)) / 40320 * pow(z, 7) + (4369 * pow(std::numbers::pi, 4)) / 5806080 * pow(z, 9) + (34807 * pow(std::numbers::pi, 5)) / 182476800 * pow(z, 11));
 	}
 
 	double invNormalCDF(double value)
 	{
-		return inverf(1 - 2 * value) / (-1 * SQRT_1_2);
+		return inverf(1 - 2 * value) / (-1 * constants::SQRT_1_2);
 	}
 
 	double calcPValue(double value, double mean, double std)
