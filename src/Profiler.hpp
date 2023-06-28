@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <chrono>
+
 namespace stats 
 {
 	//using p_getOneVarStats = stats::oneVarStats(*)(std::vector<double>*);

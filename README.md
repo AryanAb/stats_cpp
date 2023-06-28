@@ -19,6 +19,7 @@ stats_cpp is a bare-bones header only C++ statistics library. It is designed to 
   * [Normal CDF and Inverse Normal CDF](#normal-cdf-and-inverse-normal-cdf)
   * [P-Value](#p-value)
   * [Confidence Interval](#confidence-interval)
+  * [Linear Regression](#linear-regression)
 * [Performance](#performance)
 
 ## Install
@@ -166,7 +167,7 @@ double value = SOME_VALUE;
 
 double p1 = calcPValue(value, data);
 
-stats::oneVarStats ovs = stats::getOneVarStats(data);
+stats::OneVarStats ovs = stats::getOneVarStats(data);
 double p2 = calcPValue(value, ovs);
 
 double mean = MEAN_VALUE;
@@ -181,7 +182,15 @@ double confidence = 0.05;
 double size = 100;
 double parameter = P;
 
-stats::interval ci = stats::calcInterval(confidence, size, parameter);
+stats::Interval ci = stats::calcInterval(confidence, size, parameter);
+```
+
+### Linear Regression
+
+```c++
+const std::vector<std::pair<double, double>> pairs = { {x1, y1}, {x2, y2}, ... };
+
+stats::LinearRegression lr = stats::calcLinearRegression(pairs);
 ```
 
 ## Performance

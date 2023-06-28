@@ -1,7 +1,9 @@
-#include <iostream>
-#include "Statistics.hpp"
-#include "Profiler.hpp"
+#include "../src/Statistics.hpp"
+#include "../src/Profiler.hpp"
 
+#include <vector>
+#include <random>
+#include <iostream>
 
 int main()
 {
@@ -14,7 +16,7 @@ int main()
 		nums.push_back(n);
 	}
 
-	stats::timer(&nums, stats::getOneVarStats);
+	stats::timer(stats::getOneVarStats, nums);
 
 	std::cout << nums.size() << std::endl;
 

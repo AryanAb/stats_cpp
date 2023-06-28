@@ -1,16 +1,11 @@
 #pragma once
 
-#include <iostream>
 #include <math.h>
 #include <vector>
 #include <set>
 #include <algorithm>
-#include <future>
-#include <random>
-#include <chrono>
 #include <numbers>
-#include "Statistics.hpp"
-#include "Profiler.hpp"
+#include <utility>
 
 namespace stats
 {
@@ -19,7 +14,7 @@ namespace stats
 		constexpr double SQRT_1_2 = 0.7071067812;
 	} // namespace stats::constants
 
-	struct oneVarStats
+	struct OneVarStats
 	{
 		double sum;
 		double mean;
@@ -35,25 +30,14 @@ namespace stats
 		double mode;
 	};
 
-	struct xyPair
-	{
-		double x;
-		double y;
-
-		xyPair(double x, double y)
-			: x(x), y(y)
-		{
-		}
-	};
-
-	struct linearRegression
+	struct LinearRegression
 	{
 		double r;
 		double rSquared;
 		double slope;
 		double yIntercept;
 
-		linearRegression(double r, const oneVarStats &x, const oneVarStats &y)
+		LinearRegression(double r, const OneVarStats &x, const OneVarStats &y)
 			: r(r)
 		{
 			rSquared = r * r;
@@ -142,7 +126,7 @@ namespace stats
 		return n + l;
 	}
 
-	void IQR(const std::vector<double> &arr, oneVarStats &data)
+	void IQR(const std::vector<double> &arr, OneVarStats &data)
 	{
 		unsigned int mid_index = median(0, arr.size());
 
@@ -191,11 +175,11 @@ namespace stats
 		return mode;
 	}
 
-	oneVarStats getOneVarStats(std::vector<double> &arr)
+	OneVarStats getOneVarStats(std::vector<double> &arr)
 	{
 		std::sort(arr.begin(), arr.end());
 
-		oneVarStats data;
+		OneVarStats data;
 
 		data.size = arr.size();
 		data.min = arr.front();
@@ -238,14 +222,14 @@ namespace stats
 		return (value - mean) / std;
 	}
 
-	double calcZScore(double value, oneVarStats stats)
+	double calcZScore(double value, OneVarStats stats)
 	{
 		return calcZScore(value, stats.mean, stats.std);
 	}
 
 	double calcZScore(double value, std::vector<double> &values)
 	{
-		oneVarStats data = getOneVarStats(values);
+		OneVarStats data = getOneVarStats(values);
 
 		return calcZScore(value, data.mean, data.std);
 	}
@@ -272,14 +256,14 @@ namespace stats
 		return 1 - normalCDF((value - mean) / std);
 	}
 
-	double calcPValue(double value, oneVarStats stats)
+	double calcPValue(double value, OneVarStats stats)
 	{
 		return calcPValue(value, stats.mean, stats.std);
 	}
 
 	double calcPValue(double value, std::vector<double> &values)
 	{
-		oneVarStats data = getOneVarStats(values);
+		OneVarStats data = getOneVarStats(values);
 
 		return calcPValue(value, data.mean, data.std);
 	}
@@ -290,25 +274,25 @@ namespace stats
 		return interval(p - me, p, p + me, confidence);
 	}
 
-	const linearRegression calcLinearRegression(const std::vector<xyPair> &pairs)
+	const LinearRegression calcLinearRegression(const std::vector<std::pair<double, double>> &pairs)
 	{
 		std::vector<double> x;
 		std::vector<double> y;
-		for (xyPair pair : pairs)
+		for (std::pair<double, double> pair : pairs)
 		{
-			x.push_back(pair.x);
-			y.push_back(pair.y);
+			x.push_back(pair.first);
+			y.push_back(pair.second);
 		}
-		oneVarStats xValues = getOneVarStats(x);
-		oneVarStats yValues = getOneVarStats(y);
+		OneVarStats xValues = getOneVarStats(x);
+		OneVarStats yValues = getOneVarStats(y);
 
 		double sum = 0;
-		for (xyPair pair : pairs)
+		for (std::pair<double, double> pair : pairs)
 		{
-			sum += calcZScore(pair.x, xValues.mean, xValues.std) * calcZScore(pair.y, yValues.mean, yValues.std);
+			sum += calcZScore(pair.first, xValues.mean, xValues.std) * calcZScore(pair.second, yValues.mean, yValues.std);
 		}
 
-		const linearRegression result(sum / (pairs.size() - 1), xValues, yValues);
+		const LinearRegression result(sum / (pairs.size() - 1), xValues, yValues);
 
 		return result;
 	}
